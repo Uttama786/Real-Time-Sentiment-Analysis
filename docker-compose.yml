@@ -1,0 +1,100 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: sentiment_postgres
+    environment:
+      POSTGRES_DB: sentiment_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "0000"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sentiment_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: sentiment_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - sentiment_network
+
+  ingestion:
+    build: .
+    container_name: sentiment_ingestion
+    command: python services/ingestion.py
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - sentiment_network
+    restart: unless-stopped
+
+  processor:
+    build: .
+    container_name: sentiment_processor
+    command: python services/processor.py
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - sentiment_network
+    restart: unless-stopped
+
+  api:
+    build: .
+    container_name: sentiment_api
+    command: python app.py
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - sentiment_network
+    restart: unless-stopped
+
+  dashboard:
+    build: .
+    container_name: sentiment_dashboard
+    command: python dashboard/app.py
+    env_file:
+      - .env
+    environment:
+      - API_URL=http://api:8000
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+    ports:
+      - "8050:8050"
+    depends_on:
+      - api
+    networks:
+      - sentiment_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  sentiment_network:
+    driver: bridge

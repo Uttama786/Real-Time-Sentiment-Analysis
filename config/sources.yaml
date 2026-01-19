@@ -1,0 +1,42 @@
+sources:
+  twitter:
+    enabled: true  # Real-time Twitter ingestion enabled
+    # Get your Twitter API credentials from: https://developer.twitter.com/
+    # Twitter API v2 (Bearer Token) - Recommended
+    use_bearer_token: true
+    bearer_token: "YOUR_TWITTER_BEARER_TOKEN_HERE"
+    # OR Twitter API v1.1 (OAuth 1.0a) - set use_bearer_token to false
+    api_key: "YOUR_TWITTER_API_KEY_HERE"
+    api_secret: "YOUR_TWITTER_API_SECRET_HERE"
+    access_token: "YOUR_TWITTER_ACCESS_TOKEN_HERE"
+    access_token_secret: "YOUR_TWITTER_ACCESS_TOKEN_SECRET_HERE"
+    # Search configuration
+    # WARNING: Twitter Free tier has NO keyword search access (402 error)
+    # Requires Basic ($100/mo) or higher. Current usage shows 402 Payment Required.
+    # Reduce keywords and polling for minimal API usage if you upgrade.
+    keywords:
+      - "product review"  # Only 1 keyword to minimize API calls
+    languages:
+      - "en"
+    max_tweets: 10  # Reduced from 50 to save credits
+    max_replies_per_tweet: 0  # DISABLED - replies consume too many credits
+    fetch_replies: false  # Disable fetching replies to save API calls
+    polling_interval: 3600  # Increased to 1 hour (3600 seconds) to avoid rate limits
+  
+  news:
+    enabled: true
+    feeds:
+      - "https://news.ycombinator.com/rss"
+      - "https://techcrunch.com/feed"
+      - "https://www.theverge.com/rss/index.xml"
+    polling_interval: 300  # seconds
+  
+  custom:
+    enabled: false
+    endpoint: "http://your-custom-api.com/data"
+    polling_interval: 120  # seconds
+
+processing:
+  batch_size: 50
+  queue_size: 1000
+  workers: 4

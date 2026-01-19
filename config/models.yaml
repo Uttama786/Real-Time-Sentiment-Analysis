@@ -1,0 +1,32 @@
+sentiment_models:
+  primary:
+    name: "vader"
+    type: "rule_based"
+    enabled: true
+  
+  secondary:
+    name: "textblob"
+    type: "statistical"
+    enabled: true
+  
+  advanced:
+    name: "transformers"
+    model: "distilbert-base-uncased-finetuned-sst-2-english"
+    type: "neural"
+    enabled: false  # Enable if GPU available
+    batch_size: 32
+
+preprocessing:
+  lowercase: true
+  remove_urls: true
+  remove_mentions: true
+  remove_hashtags: false
+  remove_punctuation: false
+  remove_stopwords: false
+  min_length: 3
+  max_length: 280
+
+thresholds:
+  positive: 0.05
+  negative: -0.05
+  confidence: 0.6
